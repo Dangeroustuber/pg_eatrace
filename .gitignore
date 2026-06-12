@@ -1,0 +1,17 @@
+# Build artifacts
+obj/
+*.o
+*.Po
+*.so
+*.bc
+
+# Generated tooling files
+compile_commands.json
+
+# PostgreSQL regression test output
+regression.diffs
+regression.out
+results/
+
+# Editor
+.vscode/
