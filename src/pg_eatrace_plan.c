@@ -485,6 +485,7 @@ void enqueuePlanNodeSpans(QueryDesc* queryDesc, Span* querySpan, uint64 querySta
         .queryStartNs = queryStartNs,
         .queryEndNs = queryEndNs,
     };
+
     uint8 rootChildParent[PG_EATRACE_SPAN_ID_SIZE];
     PlanNodeSpanContext childContext;
 

@@ -4,14 +4,34 @@ obj/
 *.Po
 *.so
 *.bc
+*.so.*
+*.a
+*.la
+*.lo
+*.dylib
+*.dll
+*.exe
 
 # Generated tooling files
 compile_commands.json
+.cache/
+.ccls-cache/
 
 # PostgreSQL regression test output
 regression.diffs
 regression.out
 results/
+tmp_check/
+tmp_install/
+log/
 
-# Editor
+# Local deployment manifests
+deploy/
+
+# Local/editor files
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store

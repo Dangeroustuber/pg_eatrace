@@ -1,0 +1,10 @@
+.git/
+.vscode/
+obj/
+*.o
+*.Po
+*.so
+*.bc
+compile_commands.json
+docs/
+test/
