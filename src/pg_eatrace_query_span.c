@@ -11,6 +11,18 @@
 #include "pg_eatrace_trace_state.h"
 #include "pg_eatrace_trace_context.h"
 
+// Enqueue the planner span that plannerHook stashed on the PlannerTraceState,
+// next to its query span so the parent is always present in the export. A no-op
+// when planning produced no span (uncached re-execution, planning error).
+static void flushStoredPlannerSpan(QueryDesc* queryDesc) {
+    PlannerTraceState* plannerState = findPlannerState(queryDesc->plannedstmt);
+
+    if (plannerState && plannerState->hasPlannerSpan) {
+        enqueueSpan(&plannerState->plannerSpan);
+        plannerState->hasPlannerSpan = false;
+    }
+}
+
 static double finishTotalTime(QueryDesc* queryDesc) {
     if (queryDesc->totaltime == NULL) {
         return 0.0;
@@ -74,6 +86,7 @@ void emitFailedQuerySpan(QueryDesc* queryDesc, const char* sqlState, const char*
         buildQuerySpan(&span, queryState, queryDesc, queryState->startTimeUnixNano, endNs);
         addErrorToSpan(&span, sqlState, message);
         enqueueSpan(&span);
+        flushStoredPlannerSpan(queryDesc);
         queryState->spanEmitted = true;
     }
 }
@@ -100,6 +113,7 @@ void emitSuccessfulQuerySpan(QueryDesc* queryDesc) {
 
         buildQuerySpan(&span, queryState, queryDesc, startNs, endNs);
         enqueueSpan(&span);
+        flushStoredPlannerSpan(queryDesc);
         enqueuePlanNodeSpans(queryDesc, &span, startNs, endNs);
         queryState->spanEmitted = true;
     }

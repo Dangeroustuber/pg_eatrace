@@ -324,7 +324,6 @@ static PlannedStmt* plannerHook(Query* parse, const char* queryString, int curso
 
     if (hasTraceParent) {
         PlannerTraceState* plannerState = createPlannerState(plannedStatement);
-        Span span;
         uint64 endNs = getCurrentUnixTime();
 
         plannerState->hasTraceParent = true;
@@ -333,8 +332,13 @@ static PlannedStmt* plannerHook(Query* parse, const char* queryString, int curso
         memcpy(plannerState->querySpanId, querySpanId, sizeof(plannerState->querySpanId));
         plannerState->startTimeUnixNano = startNs;
 
-        buildPlannerSpan(&span, parse, plannedStatement, cursorOptions, startNs, endNs, traceId, querySpanId);
-        enqueueSpan(&span);
+        // Defer the enqueue until the query span is emitted (emitSuccessfulQuerySpan /
+        // emitFailedQuerySpan). A cached/prepared/nested statement can plan here yet
+        // emit its query span under a different id, or never reach ExecutorEnd at all;
+        // enqueuing now would leave a planning span whose query-span parent is never
+        // exported. Tying the two together keeps the planner span from orphaning.
+        buildPlannerSpan(&plannerState->plannerSpan, parse, plannedStatement, cursorOptions, startNs, endNs, traceId, querySpanId);
+        plannerState->hasPlannerSpan = true;
     }
 
     return plannedStatement;

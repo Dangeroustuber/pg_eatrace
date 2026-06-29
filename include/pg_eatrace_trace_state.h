@@ -26,6 +26,8 @@ typedef struct QueryTraceState {
 typedef struct PlannerTraceState {
     PlannedStmt* plannedStatement;
     bool hasTraceParent;
+    bool hasPlannerSpan;
+    Span plannerSpan;
     uint8 traceId[PG_EATRACE_TRACE_ID_SIZE];
     uint8 parentSpanId[PG_EATRACE_SPAN_ID_SIZE];
     uint8 querySpanId[PG_EATRACE_SPAN_ID_SIZE];

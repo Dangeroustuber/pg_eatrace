@@ -45,7 +45,7 @@ Hold these when changing code; they double as the review checklist.
 
 ## Known Limitations
 
-- Cached/prepared plans: only the first execution gets a planning+execution query span; later executions are execution-scoped (and nested cached statements can emit planning spans whose query-span parent id is never emitted).
+- Cached/prepared plans: only the first execution gets a planning+execution query span; later executions are execution-scoped. The planner span is enqueued with its query span (deferred from `planner_hook` to `emitSuccessfulQuerySpan`/`emitFailedQuerySpan` via `PlannerTraceState.plannerSpan`), so a cached/nested statement whose query span is never emitted drops its planner span instead of orphaning it.
 - Failed executor queries emit the query-level error span but no partial plan-node spans.
 - Error spans embed the server error message, which can contain data values.
 - Export transport is plain HTTP/1.1 without TLS; `https://` collector URLs are rejected. The intended deployment is an in-cluster collector agent (e.g. Grafana Alloy) reached over the pod network. If TLS is ever needed, link OpenSSL (present wherever PostgreSQL runs) rather than reintroducing libcurl.
